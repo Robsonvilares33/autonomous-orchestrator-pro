@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  orchestrator:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - MOLTBOT_WEBHOOK_URL=http://moltbot:8080/moltbot-webhook
+      - MOLTBOT_AUTH_TOKEN=${MOLTBOT_AUTH_TOKEN:-your_moltbot_secret_token}
+      - API_DEBUG=True
+      - LOG_LEVEL=DEBUG
+    volumes:
+      - ./src:/app/src
+      - ./config:/app/config
+    depends_on:
+      - moltbot
+    networks:
+      - orchestrator-network
+
+  moltbot:
+    image: moltbot:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - MOLTBOT_PORT=8080
+      - MOLTBOT_SECRET_TOKEN=${MOLTBOT_AUTH_TOKEN:-your_moltbot_secret_token}
+    networks:
+      - orchestrator-network
+
+networks:
+  orchestrator-network:
+    driver: bridge
